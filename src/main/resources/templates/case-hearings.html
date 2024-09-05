@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{assets/css/bootstrap.min.css}">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" th:href="@{assets/plugins/fontawesome/css/fontawesome.min.css}">
+    <link rel="stylesheet" th:href="@{assets/plugins/fontawesome/css/all.min.css}">
+
+    <!-- Lineawesome CSS -->
+    <link rel="stylesheet" th:href="@{assets/css/line-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{assets/css/material.css}">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" th:href="@{assets/plugins/select2/css/select2.min.css}">
+
+    <!-- Datatable CSS -->
+    <link rel="stylesheet" th:href="@{assets/css/dataTables.bootstrap4.min.css}">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" th:href="@{assets/css/style.css}">
+</head>
+<body layout:fragment="content">
+<div class="container ">
+    <div class="d-flex justify-content-between">
+        <h2 th:text="${menuName}"></h2>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-striped custom-table table-bordered mt-4" id="upcomingHearingTable">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Hearing Date</th>
+                        <th>Case ID</th>
+                        <th>Case Title</th>
+                        <th>Lawyer</th>
+                        <th th:if="${menuName=='Hearing History'}">Judgement</th>
+                        <th th:if="${menuName=='Hearing History'}">Judges</th>
+                        <th th:if="${menuName=='Hearing History'}">Result</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="hearing : ${upComingHearings}" th:data-hearingId="${hearing.hearingId}" th:data-hearingDate="${hearing.caseHearingDate}">
+                            <td th:text="${hearing.caseHearingDate}"></td>
+                            <td th:text="${hearing.caseId}"></td>
+                            <td th:text="${hearing.caseTitle}"></td>
+                            <td th:text="${hearing.caseLawyer}"></td>
+                            <td th:text="${hearing.caseHrJudgement}" th:if="${menuName=='Hearing History'}"></td>
+                            <td th:text="${hearing.caseHeardJudges}" th:if="${menuName=='Hearing History'}"></td>
+                            <td th:text="${hearing.caseHearingResult}" th:if="${menuName=='Hearing History'}"></td>                            
+                            <td>
+                                <div th:if="${hearing.caseHearingResult!='C'}">
+                                    <button type="button" class="fa fa-plus btn btn-soft-success rounded-pill" data-bs-toggle="modal" data-bs-target="#hearingModal" id="editHearingDetail" onclick="operPopUp(this)"></button>
+                                </div>
+                            </td>                          
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="hearingModal" tabindex="-1" aria-labelledby="hearingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Hearing Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="row" id="updateHearingDetails" th:action="@{/updateHearingDetails}" enctype="multipart/form-data">
+                    <input type="hidden" id="hearingId" name="hearingId">
+                    <div class="col-md-12 mb-3">
+                        <label class="col-form-label">Hearing Date: </label>
+                        <input type="text" name="caseHearingDate" id="caseHearingDate" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="col-form-label">Heared Judge<span class="text-danger">*</span></label>
+                        <input type="text" name="caseHeardJudges" id="caseHearingJudges" class="form-control" required>
+                    </div>
+                    <div class="col-md-12 mb-3" id="hrResult">
+                        <label for="hearingResult" class="col-form-label">Hearing Result :</label>
+                        <select id="hearingResult" class="form-control" name="caseHearingResult" onchange="resultChange(this)">
+                            <option value="0" disabled selected>Select Result</option>
+                            <option value="C">Case Closed</option>
+                            <option value="PD">Postponed On Date</option>
+                            <option value="PWD">Postponed Without Date</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-3" style="display: none;" id="pDate">
+                        <label for="casePostponedDate" class="col-form-label ">Postponed Date :</label>
+                        <input type="text" class="form-control floating datetimepicker" id="casePostponedDate" name="casePostDate"/>
+                    </div>
+                    <div class="col-md-12 mb-3" style="display: none;" id="hrJudgement">
+                        <label for="caseHearingJudgement" class="col-form-label">Hearing Judgement :</label>
+                        <textarea id="caseHearingJudgement" rows="4" name="caseHrJudgement" class="form-control"></textarea>
+                    </div>
+                    <div class="col-md-12 mb-3" id="closedDocs" style="display: none;">
+                        <label class="col-form-label">Supporting Documents</label>
+                        <input type="file" name="attachedDocs" class="form-control" id="attachedDocs" accept=".pdf" multiple>
+                    </div>
+                    <div class="submit-section">
+                        <button class="btn btn-soft-success submit-btn">Save</button>
+                    </div>
+                </form>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast colored-toast bg-success-transparent" role="alert" aria-live="assertive"
+         aria-atomic="true">
+        <div class="toast-header bg-success text-fixed-white">
+            <strong class="me-auto">Toast</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Case Updates Successfully
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{assets/js/jquery-3.7.1.min.js}"></script>
+
+<!-- Bootstrap Core JS -->
+<script th:src="@{assets/js/bootstrap.bundle.min.js}"></script>
+
+<!-- Slimscroll JS -->
+<script th:src="@{assets/js/jquery.slimscroll.min.js}"></script>
+
+<!-- Select 2 -->
+<script th:src="@{assets/plugins/select2/js/select2.min.js}"></script>
+<script th:src="@{assets/plugins/select2/js/custom-select.js}"></script>
+
+<!-- Datatable JS -->
+<script th:src="@{assets/js/jquery.dataTables.min.js}"></script>
+<script th:src="@{assets/js/dataTables.bootstrap4.min.js}"></script>
+
+<!-- Sweet Alert -->
+<script th:src="@{assets/plugins/sweetalert/sweetalert2.all.min.js}"></script>
+<script th:src="@{assets/plugins/sweetalert/sweetalerts.min.js}"></script>
+<script>
+    $(document).ready(function() {
+        $('#upcomingHearingTable').DataTable();
+    })
+</script>
+
+<script>
+
+
+    $(document).ready(function() {
+        $('#updateHearingDetails').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            var formData = new FormData(this);
+
+            // Perform the AJAX request
+            $.ajax({
+                url: $(event.target).attr('action'), // URL from the form's action attribute
+                type: 'POST', // Method of the request
+                data: formData, // Serialized form data
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: "Good job!",
+                        text: "Hearing Details updated successfully!",
+                        icon: "success",
+                        confirmButtonClass: "btn btn-primary",
+                        buttonsStyling: false
+                    }).then(() => {
+                        // Optionally, you can redirect or refresh the page here
+                        window.location.href = contextPath+'/UpcomingHearing';
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error:', error);
+                    Swal.fire({
+                        title: "Error!",
+                        text: "There was a problem submitting the details.",
+                        icon: "error",
+                        confirmButtonClass: "btn btn-primary",
+                        buttonsStyling: false
+                    });
+                }
+            });
+        });
+    });
+
+
+    function resultChange(select){
+        var value = select.value;
+        if(value=='C'){
+            $('#pDate').hide();
+            $('#closedDocs').show();
+            $('#hrJudgement').show();
+        }
+        else if(value=='PD'){
+            $('#pDate').show();
+            $('#closedDocs').hide();
+            $('#hrJudgement').hide();
+        }
+        else if(value=='PWD'){
+            $('#pDate').hide();
+            $('#closedDocs').hide();
+            $('#hrJudgement').hide();
+        }
+    }
+
+
+
+    function operPopUp(button){
+        var $row = button.closest('tr');
+        var hearingId = $($row).attr('data-hearingId');
+        var hearingDate = $($row).attr('data-hearingDate');
+        $('#hearingId').val(hearingId);
+        $('#caseHearingDate').val(hearingDate);
+
+    }
+
+
+
+
+</script>
+
+<script src="assets/js/moment.min.js"></script>
+<script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+</body>
+</html>

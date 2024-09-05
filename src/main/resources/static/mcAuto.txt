@@ -1,0 +1,113 @@
+public ActionForward searchSupplierMultiCol(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException {
+		String accHead=request.getParameter("accHead");
+		String venType=request.getParameter("venType");
+		HttpSession session = request.getSession();
+		LookUpClient lookup = new LookUpClient();
+		PurchaseOrderRemote remote = null;
+		try {
+			LoginParameter login = (LoginParameter)session.getAttribute("LoginParameter");
+
+			remote = (PurchaseOrderRemote)lookup.getRemote("easycbs.fixedAsset.ejbserver.PurchaseOrderHome",
+					"easycbs.fixedAsset.ejbserver.PurchaseOrderRemote", "PurchaseOrder");
+			String[][] data = remote.searchSupplierMultiCol(accHead,venType,login);
+			if(data != null){
+				Gson gson = new Gson() ;
+				String jsonAry = gson.toJson(data);
+				PrintWriter out = response.getWriter();
+				out.print(jsonAry);        
+				out.flush(); 
+				out.close();
+				return null ;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mapping.findForward("null");
+	}
+
+
+
+
+
+
+
+
+
+public String[][]  searchSupplierMultiCol(String accHead,String venType,LoginParameter login) throws RemoteException{
+		DataBaseClass db=new DataBaseClass();
+		String value[][] = null;
+		String processHead = BMConfig.getProperty("PROCESSHEAD", "120");
+		SelectDataBean bean = new SelectDataBean(db); 
+		String query = "";
+		CommonParameter cpr = new GiveCommonParameter().getCommonParameter() ; 
+		try{  
+			if (BMConfig.getProperty("PROVIDER").equals("ORACLE") ) { 
+			query = "select  top 500 assupmst_ename as supplier,gstNumber,assupmst_panno,SUBSTR(supgst_address,1,30),city_ename,stat_ename, sg.BANKDETAILS, sg.IFCSCODE, asu.assupmst_kid,supgst_kid from s_assupmst asu ,s_adr,s_supplierGst sg  , s_stat , s_city "
+				+ "where (assupmst_ename like '%"+accHead+"%' or supgst_address like '%"+accHead+"%') and isnull(assupmst_authorised,'Y') = 'Y' and isnull(supblacklist,'N') = 'N' and sg.assupmst_kid=asu.assupmst_kid and asu.assupmst_kid=adr_fid and adr_table='SUP' and stat_kid = supgst_state and city_kid = supgst_city  ";
+			}else if(cpr.getgsParentCode().equalsIgnoreCase("COMP")  )
+			{
+				query="select top 100 assupmst_ename as supplier,supGst_salOffename,gstNumber,assupmst_panno,adr_pincode,"
+					+ "city_ename,stat_ename,sg.BANKDETAILS, sg.IFCSCODE,asu.assupmst_kid,supgst_kid from s_assupmst asu ,s_adr,s_supplierGst sg  , s_stat , s_city "
+					+ "where assupmst_ename like '%"+accHead+"%' and isnull(assupmst_authorised,'Y') = 'Y' "
+					+ "and isnull(supblacklist,'N') = 'N' and sg.assupmst_kid=asu.assupmst_kid and "
+					+ "asu.assupmst_kid=adr_fid and stat_kid = supgst_state and city_kid = supgst_city  "
+					+ "and assupmst_venType in ('S','T','B','G','J','A')";
+				
+				query+= " order by assupmst_ename,stat_ename";
+				value=bean.getData(11, query);
+			}
+			else { 
+				if(cpr.getgsParentCode().equalsIgnoreCase("PB") ) {
+					query = "select top 500 concat(assupmst_code,' - ',assupmst_ename) as supplier,supGst_salOffename,gstNumber,assupmst_panno,LEFT(supgst_address,30),city_ename,stat_ename, sg.BANKDETAILS, sg.IFCSCODE,asu.assupmst_kid,supgst_kid " +
+					" from s_assupmst asu left outer join s_adr on asu.assupmst_kid=adr_fid " +
+					" left outer join s_supplierGst sg  on sg.assupmst_kid=asu.assupmst_kid " +
+					" left outer join s_stat on stat_kid = supgst_state left outer join  s_city on  city_kid = supgst_city "
+					+ "where (assupmst_ename like '%"+accHead+"%'  or assupmst_code like '%"+accHead+"%') and " +
+					"isnull(assupmst_authorised,'Y') = 'Y' and isnull(supblacklist,'N') = 'N' " +
+					" and adr_table='SUP' ";
+				}else {				//GSTN  Case 
+					query = "select top 500 assupmst_ename  as supplier,supGst_salOffename,gstNumber,assupmst_panno,LEFT(supgst_address,30),city_ename,stat_ename, sg.BANKDETAILS, sg.IFCSCODE,asu.assupmst_kid,supgst_kid "
+						+ " from s_assupmst asu left outer join s_adr on asu.assupmst_kid=adr_fid "
+						+ " left outer join s_supplierGst sg  on sg.assupmst_kid=asu.assupmst_kid "
+						+ " left outer join s_stat on stat_kid = supgst_state left outer join  s_city on  city_kid = supgst_city "
+						+ "where (assupmst_ename like '%"
+						+ accHead
+						+ "%'  or assupmst_code like '%"  
+						+ accHead
+						+ "%') and "
+						+ "isnull(assupmst_authorised,'Y') = 'Y' and isnull(supblacklist,'N') = 'N' "
+						+ " and adr_table='SUP' ";
+				}
+			}
+			if(venType!=null && !venType.equalsIgnoreCase("")){
+				if (venType.equals("C")) { 
+					query+= " and assupmst_venType in ('C','B') ";
+				} else if (venType.equals("S")) { 
+					query+= " and assupmst_venType in ('S','B') ";
+				}else { 
+					query+= " and assupmst_venType = '" + venType + "'" ;
+				}
+				
+				if(venType.equals("J")){
+					query+= " and asu.supGlHead = '" +  processHead + "'";
+				}
+			}
+			if(!cpr.getgsParentCode().equalsIgnoreCase("COMP"))
+			{
+				query+= " order by assupmst_ename,stat_ename";
+				value=bean.getData(11, query);
+			}
+			
+			
+
+		}
+		catch(Exception e) {   
+			e.printStackTrace();
+		}
+		finally{
+			db.Finalize();
+		}
+		return value;
+	}
+	

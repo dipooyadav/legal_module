@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/fontawesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/all.min.css}">
+
+    <!-- Lineawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/line-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/material.css}">
+
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/select2.min.css}">
+
+    <!-- Datatable CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/dataTables.bootstrap4.min.css}">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+
+
+</head>
+
+
+<body layout:fragment="content">
+<div class="container card">
+    <form th:action="@{/saveHearingDetails}" method="post" class="g-3 mt-3 form-box" onsubmit="return submitForm(event)">
+        <div class="d-flex justify-content-between">
+            <h2 th:text="${menuName}"></h2>
+        </div>
+        <div class="row p-4 pt-3">
+            <div class="col-md-3 mb-3">
+                <label for="caseTitle" class="col-form-label">Case :</label>
+                <input type="text" id="caseTitle" class="form-control caseMcAutoComplete" name="caseTitle" required/>
+                <input type="hidden" id="caseId" class="form-control" name="caseId" />
+
+            </div>
+            <div class="col-md-3 mb-3" >
+                <label for="caseHearingDate" class="col-form-label">Hearing Date :</label>
+                <input type="text" class="form-control  floating datetimepicker" id="caseHearingDate" name="caseHearingDate" onblur="ifDateSmaller(this)" required/>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="hearingLawyer" class="col-form-label">Case Lawyer :</label>
+                <input type="text" id="hearingLawyer" class="form-control clientMcAuto" name="caseLawyer" required/>
+            </div>
+            <div class="col-md-3 mb-3" style="display: none;" id="hrResult">
+                <label for="hearingResult" class="col-form-label">Hearing Result :</label>
+                <select id="hearingResult" class="form-control" name="caseHearingResult" onchange="resultChange(this)">
+                    <option value="0" disabled selected>Select Result</option>
+                    <option value="C">Case Closed</option>
+                    <option value="P">Pending</option>
+                    <option value="PD">Postponed On date</option>
+                    <option value="PWD">Postponed Without Date</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3" style="display: none;" id="pDate">
+                <label for="casePostponedDate" class="col-form-label ">Postponed Date :</label>
+                <input type="text" class="form-control floating datetimepicker" id="casePostponedDate" name="casePostDate"/>
+            </div>
+            <div class="col-md-3 mb-3" style="display: none;" id="hrJudges">
+                <label for="caseHearingJudges" class="col-form-label">Heard Judges :</label>
+                <textarea id="caseHearingJudges" rows="4" name="caseHeardJudges" class="form-control"></textarea>
+            </div>
+            <div class="col-md-3 mb-3" style="display: none;" id="hrJudgement">
+                <label for="caseHearingJudgement" class="col-form-label">Hearing Judgement :</label>
+                <textarea id="caseHearingJudgement" rows="4" name="caseHrJudgement" class="form-control"></textarea>
+            </div>
+            <div class="col-12 d-flex justify-content-center mt-3">
+                <button type="submit" class="btn btn-soft-success">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- Bootstrap JS and dependencies -->
+<script th:src="@{/assets/js/jquery-3.7.1.min.js}"></script>
+
+<!-- Bootstrap Core JS -->
+<script th:src="@{assets/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{assets/plugins/sweetalert/sweetalert2.all.min.js}"></script>
+<script th:src="@{assets/plugins/sweetalert/sweetalerts.min.js}"></script>
+
+<script>
+    function submitForm(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Serialize the form data
+        var formData = $(event.target).serialize();
+
+        // Perform the AJAX request
+        $.ajax({
+            url: $(event.target).attr('action'), // URL from the form's action attribute
+            type: 'POST', // Method of the request
+            data: formData, // Serialized form data
+            success: function(response) {
+                Swal.fire({
+                    title: "Good job!",
+                    text: "Hearing Details submitted successfully!",
+                    icon: "success",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                }).then(() => {
+                    // Optionally, you can redirect or refresh the page here
+                    window.location.href = contextPath+'/AddHearingDetail';
+                });
+            },
+            error: function(xhr, status, error) {
+                console.log('Error:', error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "There was a problem submitting the details.",
+                    icon: "error",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                });
+            }
+        });
+
+        return false; // Prevent default form submission
+    }
+</script>
+<!-- <script>
+    function submitForm(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        var formData = new FormData(event.target); // Get form data
+
+        $.ajax({
+            url: '/saveHearingDetails', // URL of your endpoint
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                Swal.fire({
+                    title: "Good job!",
+                    text: "Hearing Details submitted successfully!",
+                    icon: "success",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                }).then(() => {
+                    // Optionally, you can redirect or refresh the page here
+                    window.location.href = '/AddHearingDetails';
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error:', errorThrown);
+                Swal.fire({
+                    title: "Error!",
+                    text: "There was a problem submitting the details.",
+                    icon: "error",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                });
+            }
+        });
+    }
+</script> -->
+<script>
+
+
+
+    // $('#caseHearingDate').datepicker({
+    //         uiLibrary: 'bootstrap5'
+    //     });
+
+
+
+
+
+    function ifDateSmaller(hearingField) {
+        var date = hearingField.value;
+        if (!date) {
+            // Handle case where date is not provided
+            return;
+        }
+
+        const [day, month, year] = date.split('-');
+        const dateToCompare = new Date(year, month - 1, day); 
+
+        if (isNaN(dateToCompare)) {
+            console.error("Invalid date format");
+            return;
+        }
+
+        const currentDate = new Date();
+
+        if (dateToCompare < currentDate) {
+            $('#hrResult').show();
+            $('#hrJudges').show();
+            $('#hrJudgement').show();
+        } else {
+            $('#hrResult').hide();
+            $('#hrJudges').hide();
+            $('#hrJudgement').hide();
+            $('#pDate').hide();
+        }
+    }
+
+    function resultChange(select){
+        var value = select.value;
+        if(value=='C' || value=='P'){
+            $('#pDate').hide();
+            $('#hrResult').show();
+            $('#hrJudges').show();
+            $('#hrJudgement').show();
+        }
+        else if(value=='PD'){
+            $('#pDate').show();
+            $('#hrResult').show();
+            $('#hrJudges').show();
+            $('#hrJudgement').show();
+        }
+        else if(value=='PWD'){
+            $('#pDate').hide();
+            $('#hrResult').show();
+            $('#hrJudges').hide();
+            $('#hrJudgement').hide();
+        }
+    }
+
+
+</script>
+</body>
+</html>

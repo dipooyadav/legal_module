@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Personal Details</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/fontawesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/all.min.css}">
+
+    <!-- Lineawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/line-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/material.css}">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/select2.min.css}">
+
+    <!-- Datatable CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/dataTables.bootstrap4.min.css}">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+</head>
+<body layout:fragment="content">
+<div class="container card">
+    <form th:action="@{/createCase}" th:object="${caseDetails}" method="post" class="g-3 mt-3 form-box" onsubmit="return submitForm(event)">
+        <div class="d-flex justify-content-between">
+            <h2>Create Case</h2>
+        </div>
+        <div class="row p-4 pt-3">
+            <input type="hidden" id="caseId" name="id" th:field="*{id}">
+            <div class="col-md-3 mb-3">
+                <label for="caseTitle" class="col-form-label">Case Title:</label>
+                <input type="text" id="caseTitle" th:field="*{caseTitle}" class="form-control" required/>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="lawyer" class="col-form-label">Lawyer:</label>
+                <input type="text" id="lawyer" th:field="*{lawyer}" class="form-control clientMcAuto" />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="caseType" class="col-form-label">Case Category:</label>
+                <select id="caseType" th:field="*{caseType}" class="form-control" required>
+                    <option value="0" disabled selected>Select Type</option>
+                         <th:block th:each="category : ${caseCategories}">
+                               <option th:value="${category.id}" th:text="${category.category_name}"></option>
+                         </th:block>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="client" class="col-form-label">Client:</label>
+                <input type="text" id="client" th:field="*{client}" class="form-control clientMcAuto" required/>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="caseDescription" class="col-form-label">Case Description:</label>
+                <textarea id="caseDescription" rows="4" th:field="*{caseDescription}" class="form-control" required></textarea>
+            </div>
+            <div class="col-12 d-flex justify-content-center mt-3">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-secondary w-auto ms-4" onclick="window.location.href='/caseList'">Case List</button>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script th:src="@{/assets/js/jquery-3.7.1.min.js}"></script>
+
+<!-- Bootstrap Core JS -->
+<script th:src="@{/assets/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/plugins/sweetalert/sweetalert2.all.min.js}"></script>
+<script th:src="@{/assets/plugins/sweetalert/sweetalerts.min.js}"></script>
+<script>
+    function submitForm(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        var formData = new FormData(event.target); // Get form data
+
+        $.ajax({
+            url: contextPath+'/createCase', // URL of your endpoint
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                Swal.fire({
+                    title: "Good job!",
+                    text: "Form submitted successfully!",
+                    icon: "success",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                }).then(() => {
+                    // Optionally, you can redirect or refresh the page here
+                    window.location.href = contextPath+'/caseList';
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error:', errorThrown);
+                Swal.fire({
+                    title: "Error!",
+                    text: "There was a problem submitting the form.",
+                    icon: "error",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                });
+            }
+        });
+    }
+</script>
+</body>
+</html>

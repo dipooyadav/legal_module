@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/fontawesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/all.min.css}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/fontawesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/plugins/fontawesome/css/all.min.css}">
+
+    <!-- Lineawesome CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/line-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/material.css}">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" th:href="@{/assets/plugins/select2/css/select2.min.css}">
+
+    <!-- Datatable CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/dataTables.bootstrap4.min.css}">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+</head>
+<body layout:fragment="content">
+<div class="container">
+    <div class="d-flex justify-content-between">
+        <h2 th:text="${menuName}"></h2>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-striped custom-table table-bordered mt-4" id="caseList">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Case Title</th>
+                        <th>Lawyer</th>
+                        <th>Case Type</th>
+                        <th>Client</th>
+                        <th>Fact File Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="case : ${cases}" th:data-caseId="${case.id}">
+                            <td th:text="${case.id}"></td>
+                            <td th:text="${case.caseTitle}"></td>
+                            <td th:text="${case.lawyer}"></td>
+                            <td th:text="${case.caseTypeEname}"></td>
+                            <td th:text="${case.client}"></td>
+                            <td th:text="${case.factFileStatus}" ></td>
+                            <td>
+                                <button type="button" class="fa fa-plus btn btn-soft-success rounded-pill" data-bs-toggle="modal" data-bs-target="#caseModal" id="addFactFile"></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Case Modal -->
+<div class="modal fade" id="caseModal" tabindex="-1" aria-labelledby="caseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Case Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Case ID:</label>
+                                    <p id="modalId" ></p>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="detail-label">Case Title:</label>
+                                    <p id="modalCaseTitle" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Lawyer:</label>
+                                    <p id="modalLawyer" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Case Type:</label>
+                                    <p id="modalCaseType" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Client:</label>
+                                    <p id="modalClient" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">AssignedTo:</label>
+                                    <p id="modalAssignedTo" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Case Deadline:</label>
+                                    <p id="modalCaseDeadline" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Case Priority:</label>
+                                    <p id="modalCasePriority" ></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Fact File Code:</label>
+                                    <div class="d-flex justify-content-between">
+                                        <p id="modalFactFileCode" >
+                                        </p>
+                                        <button type="button"  class="mb-0 fa fa-eye btn btn-soft-primary rounded-pill"
+                                            data-bs-toggle="modal" data-bs-target="#fileViewerModal"
+                                            data-fileId="" id="viewFactFile" onclick="viewFactFile(this)">View</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">caseStatus:</label>
+                                    <p id="modalCaseStatus" ></p>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="detail-label">Case Description:</label>
+                                    <p id="modalCaseDescription" ></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-dialog modal-dialog-centered modal-xl" th:unless="${isCaseFactApproval}">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="container-fluid">
+                                <form id="updateCaseForm" method="POST" action="/updateFact" enctype="multipart/form-data">
+                                    <input type="hidden" name="id" id="caseId">
+                                    <input type="hidden" id="factFileCode" name="factFileCode">
+                                    <div class="col-md-6 mb-6">
+                                        <label class="col-form-label">Fact Documents <span class="text-danger">*</span></label>
+                                            <input type="file" name="supportingDocs" class="form-control" id="supportingDocs" multiple required>
+                                    </div>
+                                        <div class="submit-section">
+                                        <button type="button" class="btn btn-soft-success submit-btn" onclick="uploadDocuments()">Submit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-dialog modal-dialog-centered modal-xl" th:if="${isCaseFactApproval}">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="container-fluid">
+                                <form th:action="@{/updatefeedback}" th:object="${caseDetails}" method="post" class="g-3 mt-3 form-box" onsubmit="return submitForm(event)" id="approvalForm">
+                                    <div class="col-md-6 mb-6">
+                                        <input type="hidden" id="caseId" name="id">
+                                        <input type="hidden" id="factFileCode" name="factFileCode">
+                                        <label for="caseFeedback" class="col-form-label">Feedback</label>
+                                        <textarea id="caseFeedback" name="factFeedback" class="form-control" required></textarea>
+                                    </div>
+                                    <input type="hidden" name="id" id="caseId"/>
+                                    <div class="submit-section">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                        <button type="button" class="btn btn-soft-danger" id="returnFact" onclick="returnFactFile()">Return</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Viewer Modal -->
+<div class="modal fade" id="fileViewerModal" tabindex="-1" aria-labelledby="fileViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="fileViewer" class="border p-3" style="height: 500px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- jQuery -->
+<script th:src="@{/assets/js/jquery-3.7.1.min.js}"></script>
+
+<!-- Bootstrap Bundle JS -->
+<script th:src="@{/assets/js/bootstrap.bundle.min.js}"></script>
+
+<!-- DataTables JS -->
+<script th:src="@{/assets/js/jquery.dataTables.min.js}"></script>
+<script th:src="@{/assets/js/dataTables.bootstrap4.min.js}"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+
+<!-- mammoth.js -->
+<script th:src="@{/assets/js/mammoth.browser.min.js}"></script>
+
+<script th:src="@{/assets/plugins/sweetalert/sweetalert2.all.min.js}"></script>
+<script th:src="@{/assets/plugins/sweetalert/sweetalerts.min.js}"></script>
+
+<script>
+
+    function submitForm(event) {
+       event.preventDefault(); // Prevent the default form submission
+
+       var formData = new FormData(event.target); // Get form data
+
+       $.ajax({
+           url: contextPath+'/updatefeedback', // URL of your endpoint
+           type: 'POST',
+           data: formData,
+           processData: false,
+           contentType: false,
+           success: function(data) {
+                Swal.fire({
+                        title: 'Success',
+                        text: data,
+                        icon: 'success',
+                        confirmButtonClass: 'btn btn-primary',
+                        buttonsStyling: false
+                    }).then(function() {
+                        // Optionally, you can redirect or refresh the page
+                        window.location.href = contextPath+'/caseFact';
+                    });
+           },
+           error: function(jqXHR, textStatus, errorThrown) {
+               console.log('Error:', errorThrown);
+               Swal.fire({
+                    title: 'Error',
+                    text: 'Error Updating Feedback.',
+                    icon: 'error',
+                    confirmButtonClass: 'btn btn-primary',
+                    buttonsStyling: false
+               });
+           }
+       });
+   }
+
+
+
+   function returnFactFile() {
+
+
+       var formData = new FormData($('#approvalForm')[0]); // Get form data
+
+       $.ajax({
+           url: contextPath+'/returnFactFile', // URL of your endpoint
+           type: 'POST',
+           data: formData,
+           processData: false,
+           contentType: false,
+           success: function(data) {
+                Swal.fire({
+                        title: 'Success',
+                        text: data,
+                        icon: 'success',
+                        confirmButtonClass: 'btn btn-primary',
+                        buttonsStyling: false
+                    }).then(function() {
+                        // Optionally, you can redirect or refresh the page
+                        window.location.href = contextPath+'/caseFact';
+                    });
+           },
+           error: function(jqXHR, textStatus, errorThrown) {
+               console.log('Error:', errorThrown);
+               Swal.fire({
+                    title: 'Error',
+                    text: 'Error Returning Fact File.',
+                    icon: 'error',
+                    confirmButtonClass: 'btn btn-primary',
+                    buttonsStyling: false
+               });
+           }
+       });
+   }
+   $(document).ready(function() {
+       $('#caseList').DataTable();
+
+       $('#caseList').on('click', '#addFactFile', function() {
+           var $row = $(this).closest('tr');
+           var caseId = $($row).attr('data-caseId');
+           $.ajax({
+               url: contextPath+'/getCaseDetail/' + caseId,
+               type: 'GET',
+               success: function(data) {
+                   $('#caseId').val(data.id);
+                   $('#factFileCode').val(data.factFileCode);
+                   $('#modalCaseTitle').text(data.caseTitle);
+                   $('#modalLawyer').text(data.lawyer);
+                   $('#modalCaseType').text(data.caseTypeEname);
+                   $('#modalClient').text(data.client);
+                   $('#modalAssignedTo').text(data.assignedToEname);
+                   $('#modalCaseDeadline').text(data.caseDeadline);
+                   $('#modalFactFileCode').text(data.factFileCode);
+                   $('#modalCaseDescription').text(data.caseDescription);
+                   $('#modalCaseStatus').text(data.caseStatus);
+                    if(data.factFileCode!=null && data.factFileCode!=''){
+                        $('#viewFactFile').attr('data-fileId', data.factFileCode);
+                        fetchData(data.factFileCode);
+                        $('#viewFactFile').show();
+                    }
+                    else{
+                        $('#viewFactFile').hide();
+                    }
+                   $('#modalId').text(data.id);
+
+
+                   var statusText;
+                   switch (data.caseStatus) {
+                       case 'A':
+                           statusText = 'Authorised';
+                           break;
+                       case 'U':
+                           statusText = 'Unauthorised';
+                           break;
+                       case 'R':
+                           statusText = 'Returned';
+                           break;
+
+                   }
+                   $('#modalCaseStatus').text(statusText);
+
+
+
+                     var priorityText;
+               switch (data.casePriority) {
+                   case 'M':
+                       priorityText = 'Medium';
+                       break;
+                   case 'H':
+                       priorityText = 'High';
+                       break;
+                   case 'S':
+                       priorityText = 'Small';
+                       break;
+                   default:
+                       priorityText = 'Unknown'; // Handle any other cases
+               }
+               $('#modalCasePriority').text(priorityText);
+
+
+                $('#caseModal').modal('show');
+               },
+               error: function(jqXHR, textStatus, errorThrown) {
+                   console.error('Error:', errorThrown);
+               }
+           });
+       });
+
+
+   
+   });
+
+    function uploadDocuments() {
+        var formData = new FormData($('#updateCaseForm')[0]);
+        $.ajax({
+            type: 'POST',
+            url: contextPath+'/updateFact',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                Swal.fire({
+                        title: 'Success',
+                        text: response,
+                        icon: 'success',
+                        confirmButtonClass: 'btn btn-primary',
+                        buttonsStyling: false
+                    }).then(function() {
+                        // Optionally, you can redirect or refresh the page
+                        window.location.href = '/caseList';
+                    });
+            },
+            error: function(error) {
+                console.error('Error uploading documents:', error);
+                Swal.fire({
+                        title: 'Error',
+                        text: 'Error uploading documents.',
+                        icon: 'error',
+                        confirmButtonClass: 'btn btn-primary',
+                        buttonsStyling: false
+                    });
+            }
+        });
+    }
+</script>
+<script>
+    $(document).ready(function() {
+        $('#caseList').DataTable();
+    });
+
+
+    function viewFactFile(button) {
+            var fileId = $(button).attr('data-fileId');
+            $.ajax({
+                url: contextPath+'/getFilePath/' + fileId,
+                type: 'GET',
+                success: function(response) {
+                    const fileData = JSON.parse(response);
+                    const fileType = fileData.fileExtension;
+                    displayFile(fileType, fileData.fileContent);
+                    $('#fileViewerModal').modal('show');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
+                }
+            });
+        }
+
+        function displayFile(fileExtension, fileContent) {
+            var fileViewer = $('#fileViewer');
+            fileViewer.empty();
+
+            var fileUrl;
+            var viewerContent = '';
+            // Create a Blob URL
+            const byteCharacters = atob(fileContent);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+
+            const blobUrl = URL.createObjectURL(blob);
+
+            switch (fileExtension) {
+                case 'pdf':
+                    fileUrl = 'data:application/pdf;base64,' + fileContent;
+                    viewerContent = '<iframe src="' + fileUrl + '" style="width:100%; height:100%;" frameborder="0"></iframe>';
+                    break;
+                case 'doc':
+                case 'docx':
+                    viewerContent = `<a href="${blobUrl+'.doc'}" download="File">Download File</a>`;
+                    break;
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif':
+                    fileUrl = 'data:image/' + fileExtension + ';base64,' + fileContent;
+                    viewerContent = '<img src="' + fileUrl + '" class="img-fluid" />';
+                    break;
+                case 'txt':
+                    fileUrl = 'data:text/plain;base64,' + fileContent;
+                    viewerContent = '<pre>' + atob(fileContent) + '</pre>';
+                    break;
+                default:
+                    viewerContent = '<p>Unsupported file type.</p>';
+            }
+
+            fileViewer.html(viewerContent);
+        }
+
+
+    async function fetchData(fileId) {
+            try {
+                const response = await fetch(contextPath+'/getDocumentDetails/'+fileId);
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                const data = await response.json();
+
+                // Now you can use the data
+                console.log('Data:', data);
+                
+                // Further processing with the fetched data
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        }
+
+</script>
+</body>
+</html>

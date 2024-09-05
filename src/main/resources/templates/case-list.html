@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    
+    <title>Case List</title>
+
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/assets/css/bootstrap.min.css}" rel="stylesheet" >
+
+    <!-- Fontawesome CSS -->
+    <link th:href="@{/assets/plugins/fontawesome/css/fontawesome.min.css}" rel="stylesheet" >
+    <link th:href="@{/assets/plugins/fontawesome/css/all.min.css}" rel="stylesheet" >
+
+    <!-- Lineawesome CSS -->
+    <link th:href="@{/assets/css/line-awesome.min.css}" rel="stylesheet" >
+    <link th:href="@{/assets/css/material.css}" rel="stylesheet" >
+
+    <!-- Select2 CSS -->
+    <link th:href="@{/assets/plugins/select2/css/select2.min.css}" rel="stylesheet" >
+
+    <!-- Datatable CSS -->
+    <link th:href="@{/assets/css/dataTables.bootstrap4.min.css}" rel="stylesheet" >
+
+    <!-- Main CSS -->
+    <link th:href="@{/assets/css/style.css}" rel="stylesheet" >
+</head>
+<style>
+    .custom-color {
+        color: #FF902F !important;
+        padding: 0px; /* Adjust the padding as needed */
+        margin: 0px 0; /* Adjust the margin as needed */
+        display: block; /* Ensures the label behaves like a block element */
+    }
+</style>
+<script>
+     
+</script>
+<body layout:fragment="content">
+<div class="container ">
+    <div class="d-flex justify-content-between">
+        <h2 th:text="${menuName}"></h2>
+        <div class="col-md-3 d-flex justify-content-end">
+            <select class="form-control w-50" id="showByStatus" onchange="showCasesByStatus(this)">
+                <option value="0">Select Status</option>
+                <option value="All">All Cases</option>
+                <option value="R">Returned</option>
+                <option value="C">Closed</option>
+                <option value="A">Approved</option>
+                <option value="U">Unapproved</option>
+            </select>
+        </div>
+        <!-- <button type="button" class="btn btn-primary w-auto h-50" onclick="window.location.href='/createCase'">Create New Case</button>
+        <button type="button" class="btn btn-primary w-auto h-50" onclick="window.location.href='/caseList/R'">Returned Cases</button> -->
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-striped custom-table table-bordered mt-4" id="caseList">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Case Title</th>
+                        <th>Lawyer</th>
+                        <th>Case Type</th>
+                        <th>Client</th>
+                        <th>Case Description</th>
+                        <th th:unless="${menuName == 'Closed Cases'}">Action</th>
+                        <th th:if="${menuName == 'Closed Cases'}">Mark Compliance</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:id="'case-row-'+ ${case.id}" th:each="case : ${cases}" data-toggle="modal" data-target="#caseModal" th:data-caseId="${case.id}">
+                            <td th:text="${case.id}"></td>
+                            <td th:text="${case.caseTitle}"></td>
+                            <td th:text="${case.lawyer}"></td>
+                            <td th:text="${case.caseTypeEname}"></td>
+                            <td th:text="${case.client}"></td>
+                            <td th:text="${case.caseDescription}"></td>
+                            <td th:if="${menuName=='Returned Cases'}">
+                                <a th:href="@{'/createCase/' + ${case.id}}" class="fas fa-edit btn btn-soft-success rounded-pill" id="returnedCaseButton" ></a>
+                                <i class="fa-solid fa-trash btn btn-soft-danger rounded-pill" th:onclick="'deleteCase(' + ${case.id} + ')'"></i>
+                                
+                            </td> 
+                            <td th:if="${menuName == 'Approved Cases' || menuName == 'All Cases' || menuName == 'Unapproved Cases'}">
+                                <button type="button" class="fa fa-plus btn btn-soft-success rounded-pill" data-bs-toggle="modal" data-bs-target="#caseModal" id="caseModalButton" onclick="openPopUp(this)"></button>
+                            </td> 
+                            <td th:if="${menuName == 'Closed Cases'}">
+                                <i class="fas fa-edit btn btn-soft-success rounded-pill" data-bs-toggle="modal" data-bs-target="#complianceModel" th:onclick="'markComplianceFun(' + ${case.id} + ')'"></i>
+                            </td> 
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="caseModal" tabindex="-1" aria-labelledby="caseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Case Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="overflow-x:auto">
+                    <table id="detailsTable" class="table table-bordered">
+                        <!-- Table headers are dynamically populated by JavaScript -->
+                    </table>
+                </div>
+                <form class="row" id="updateCaseForm" enctype="multipart/form-data">
+                    <input type="hidden" id="caseId" name="id">
+                    <div class="col-md-3 mb-3">
+                        <label class="col-form-label">Assign To: <span class="text-danger">*</span></label>
+                        <select name="assignedTo" id="assignedTo" class="form-control" required>
+                            <option value="0" disabled selected>Select User</option>
+                            <th:block th:each="user : ${s_users}">
+                                <option th:value="${user['usr_kid']}" th:text="${user['usr_ename']}"></option>
+                            </th:block>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="col-form-label">Priority<span class="text-danger">*</span></label>
+                        <select class="form-control" name="casePriority" id="casePriority" required>
+                            <option value="0">Select Priority</option>
+                            <option value="H">High</option>
+                            <option value="M">Medium</option>
+                            <option value="L">Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="col-form-label">Deadline <span class="text-danger">*</span></label>
+                        <input type="text" name="caseDeadline" class="form-control datetimepicker" id="caseDeadline" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="col-form-label">Supporting Documents</label>
+                        <input type="file" name="supportingDocs" class="form-control" id="supportingDocs" accept=".pdf" multiple>
+                    </div>
+                    <div class="submit-section">
+                        <button class="btn btn-soft-success submit-btn">Save</button>
+                        <button type="button" class="btn btn-soft-danger submit-btn" id="returnButton">Return</button>
+                    </div>
+                </form>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="complianceModel" tabindex="-1" aria-labelledby="complianceLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Compliance Marking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Case Title:</label>
+                                    <p id="modalCaseTitle" ></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Lawyer:</label>
+                                    <p id="modalLawyer" ></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Case Type:</label>
+                                    <p id="modalCaseType" ></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Client:</label>
+                                    <p id="modalClient"></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">AssignedTo:</label>
+                                    <p id="modalAssignedTo"></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Case Deadline:</label>
+                                    <p id="modalCaseDeadline"></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Case Priority:</label>
+                                    <p  id="modalCasePriority"></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">caseStatus:</label>
+                                    <p id="modalCaseStatus"></p>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-info">Case Description:</label>
+                                    <p id="modalCaseDescription"></p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form class="row" id="markCompliance" enctype="multipart/form-data">
+                    <input type="hidden" id="caseCompId" name="caseCompId">
+                    <div class="col-md-6">
+                        <input type="checkbox" id="compCheck" name="compCheck">
+                        <label for="termsCheck">Whether the compliance is done</label>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="col-form-label">Supporting Documents</label>
+                        <input type="file" name="supportingDocs" class="form-control" id="supportingDocs" accept=".pdf" multiple>
+                    </div>
+                    <div class="submit-section">
+                        <button class="btn btn-soft-success submit-btn">Save</button>
+                    </div>
+                </form>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="deleteToast" class="toast colored-toast bg-danger-transparent fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-fixed-white">
+            <strong class="me-auto">Toast</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Case <span id="delCaseId"></span> Deleted Successfully.
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/assets/js/jquery-3.7.1.min.js}"></script>
+
+<!-- Bootstrap Core JS -->
+<script th:src="@{/assets/js/bootstrap.bundle.min.js}"></script>
+
+<!-- Slimscroll JS -->
+<script th:src="@{/assets/js/jquery.slimscroll.min.js}"></script>
+
+<!-- Select 2 -->
+<script th:src="@{/assets/plugins/select2/js/select2.min.js}"></script>
+<script th:src="@{/assets/plugins/select2/js/custom-select.js}"></script>
+
+<!-- Datatable JS -->
+<script th:src="@{/assets/js/jquery.dataTables.min.js}"></script>
+<script th:src="@{/assets/js/dataTables.bootstrap4.min.js}"></script>
+
+<!-- Sweet Alert -->
+<script th:src="@{/assets/plugins/sweetalert/sweetalert2.all.min.js}"></script>
+<script th:src="@{/assets/plugins/sweetalert/sweetalerts.min.js}"></script>
+<script>
+    $(document).ready(function() {
+        $('#caseList').DataTable();
+
+        // Handle click on table row to show modal
+        
+    });
+
+    function openPopUp(button) {
+            var $row = button.closest('tr');
+            var caseId = $($row).attr('data-caseid');
+
+            // Make AJAX call to fetch case details
+            $.ajax({
+                url: contextPath+'/getCaseDetail/' + caseId,
+                type: 'GET',
+                success: function(data) {
+
+                    var rowData = {
+                        'Case ID': data.id,
+                        'Case Title': data.caseTitle,
+                        'Lawyer': data.lawyer,
+                        'Case Type': data.caseTypeEname,
+                        'Client': data.client,
+                        'Case Description': data.caseDescription,
+                        'Assigned To':data.assignedToEname,
+                        'Case Status':data.caseStatus
+                    };
+
+                    $('#caseId').val(data.id);
+                    // Populate the details table in the popup dialog
+                    var detailsTable = document.getElementById('detailsTable');
+                    detailsTable.innerHTML = ''; // Clear existing rows
+
+                    // Create table headers
+                    var headerRow = detailsTable.insertRow();
+                    headerRow.classList.add('table-dark');
+                    for (var key in rowData) {
+                        var headerCell = document.createElement("th");
+                        headerCell.textContent = key;
+                        headerRow.appendChild(headerCell);
+                    }
+
+                    // Create table body with row data
+                    var dataRow = detailsTable.insertRow();
+                    for (var key in rowData) {
+                        var cell = dataRow.insertCell();
+                        cell.textContent = rowData[key];
+                    }
+                    if(data.caseStatus=='A'){
+                        $('#assignedTo').val(data.assignedTo);
+                        $('#casePriority').val(data.casePriority);
+                        $('#caseDeadline').val(data.caseDeadline);
+                    }
+                    else{
+                        $('#assignedTo').val('0');
+                        $('#casePriority').val('0');
+                        $('#caseDeadline').val('');
+                    }
+
+
+                    $('#caseModal').modal('show');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log('Error:', errorThrown);
+                }
+            });
+    }
+
+
+    $('#updateCaseForm').on('submit', function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            type: 'POST',
+            url: contextPath+'/updateCase',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                $('#updateCaseModal').modal('hide');
+                Swal.fire({
+                    title: "Good job!",
+                    text: "Case Approved successfully!",
+                    icon: "success",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                }).then(() => {
+                    // Optionally, you can redirect or refresh the page here
+                    window.location.href = contextPath+'/caseList';
+                });
+            },
+            error: function(error) {
+                console.error('Error updating case:', error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "There was a problem Updating the Case.",
+                    icon: "error",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                });
+            }
+        });
+    });
+
+
+
+    function getUserById(userId) {
+        return fetch(contextPath+'/getUserDetail/' + userId)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.length > 0) {
+                    return data[0].usr_ename;
+                } else {
+                    return 'Unknown User';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user details:', error);
+                return 'Unknown User';
+            });
+    }
+
+    function showCasesByStatus(select){
+        
+        var val = select.value;
+        if(val=="R"){
+            window.location.href=contextPath+'/caseList/R'
+        }
+        else if(val=="C"){
+            window.location.href=contextPath+'/caseList/C'
+        }
+        else if(val=="A"){
+            window.location.href=contextPath+'/caseList/A'
+        }
+        else if(val=="U"){
+            window.location.href=contextPath+'/caseList/U'
+        }
+        else{
+            window.location.href=contextPath+'/caseList'
+        }
+    }
+
+
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        $('#returnButton').on('click', function() {
+            var caseId = $('#caseId').val();
+
+            // Ensure caseId is set before making the API call
+            if (caseId) {
+                returnCase(caseId);
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Case ID is missing.',
+                    icon: 'error',
+                    confirmButtonClass: 'btn btn-primary',
+                    buttonsStyling: false
+                });
+            }
+        });
+
+        function returnCase(caseId) {
+            $.ajax({
+                url: contextPath+'/returnCase/' + caseId,
+                type: 'GET',
+                success: function(data) {
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'The case has been returned successfully.',
+                        icon: 'success',
+                        confirmButtonClass: 'btn btn-primary',
+                        buttonsStyling: false
+                    }).then(function() {
+                        // Optionally, you can redirect or refresh the page
+                        window.location.href = contextPath+'/caseList';
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while returning the case.',
+                        icon: 'error',
+                        confirmButtonClass: 'btn btn-primary',
+                        buttonsStyling: false
+                    });
+                }
+            });
+        }
+    });
+
+
+
+
+    // function deleteCase(caseId) {
+    //     if (confirm('Are you sure you want to delete this case?')) {
+    //         fetch(`/deleteCase/${caseId}`, {
+    //             method: 'DELETE',
+    //         })
+    //         .then(response => {
+    //             if (response.status === 204) {
+    //                 var myToast = document.getElementById('deleteToast');
+    //                 document.getElementById('delCaseId').innerText = caseId;
+    //                 var toast = new bootstrap.Toast(myToast);
+    //                 toast.show();
+    //                 document.getElementById('case-row-' + caseId).remove(); // Remove the row from the DOM
+    //             } else if (response.status === 404) {
+    //                 alert('Case not found.');
+    //             } else {
+    //                 alert('Error deleting case.');
+    //             }
+    //         })
+    //         .catch(error => console.error('Error:', error));
+    //     }
+    // }
+
+
+
+    function deleteCase(caseId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(contextPath+`/deleteCase/${caseId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (response.status === 204) {
+                        var myToast = document.getElementById('deleteToast');
+                        document.getElementById('delCaseId').innerText = caseId;
+                        var toast = new bootstrap.Toast(myToast);
+                        toast.show();
+                        document.getElementById('case-row-' + caseId).remove(); // Remove the row from the DOM
+                    } else if (response.status === 404) {
+                        Swal.fire(
+                            'Error!',
+                            'Case not found.',
+                            'error'
+                        );
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'There was an error deleting the case.',
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    Swal.fire(
+                        'Error!',
+                        'An unexpected error occurred.',
+                        'error'
+                    );
+                    console.error('Error:', error);
+                });
+            }
+        });
+    }
+
+
+
+
+    function markComplianceFun(caseId){
+        $.ajax({
+            url: contextPath+'/getCaseDetail/' + caseId,
+            type: 'GET',
+            success: function(data) {
+                $('#caseCompId').val(data.id);
+                $('#modalCaseTitle').text(data.caseTitle);
+                $('#modalLawyer').text(data.lawyer);
+                $('#modalCaseType').text(data.caseTypeEname);
+                $('#modalClient').text(data.client);
+                $('#modalAssignedTo').text(data.assignedToEname);
+                $('#modalCaseDeadline').text(data.caseDeadline);
+                $('#modalFactFileCode').val(data.factFileCode);
+                $('#modalCaseDescription').text(data.caseDescription);
+                $('#modalCaseStatus').text(data.caseStatus);
+                $('#modalId').val(data.id);
+                $('#modalCaseStatus').text("Closed");
+
+
+            $('#complianceModel').modal('show');
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error:', errorThrown);
+            }
+        });
+    }
+
+
+
+    $('#markCompliance').on('submit', function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+        formData.append('isMarked', document.getElementById('compCheck').checked);
+
+        
+        $.ajax({
+            type: 'POST',
+            url: contextPath+'/caseComplianceMark',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                $('#complianceModel').modal('hide');
+                Swal.fire({
+                    title: "Good job!",
+                    text: response, // Show the server response
+                    icon: "success",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                }).then(() => {
+                    window.location.href = contextPath+'/caseList';
+                });
+            },
+            error: function(error) {
+                console.error('Error updating case:', error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "There was a problem Marking the Compliance.",
+                    icon: "error",
+                    confirmButtonClass: "btn btn-primary",
+                    buttonsStyling: false
+                });
+            }
+        });
+    });
+
+
+
+</script>
+<script>
+
+</script>
+
+
+</body>
+</html>

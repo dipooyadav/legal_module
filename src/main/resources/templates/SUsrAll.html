@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>S User</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/shards.min.css">
+
+    <style>
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .login-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        function openDelete(idval) {
+
+            var result = confirm("Want to delete Id:" + idval);
+            if (result) {
+                //Logic to delete the item
+                alert("Value for Delete:" + idval) ;
+                window.location.href="/delete/" + idval ;
+            }
+        }
+    </script>
+</head>
+<body>
+<div th:switch="${sUsrs}" class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 th:case="null">No users yet!</h2>
+
+
+            <div th:case="*">
+                <h2 class="my-5">S_User</h2>
+
+                <div class="button-container">
+                    <p class="my-5"><a href="/BidStageSignup" class="btn btn-primary"><i class="fas fa-user-plus ml-2"></i></a></p>
+                    <p class="my-5"><a href="/AllIndex"><input type="submit" class="btn btn-primary" value="Home"></a></p>
+                </div>
+
+
+                <table class="table table-striped table-responsive-md">
+                    <thead>
+                    <tr>
+
+                        <th>usr usr_code</th>
+                        <th>usr_hname</th>
+                        <th>name</th>
+                        <th>usr_ustid</th>
+                        <th>password</th>
+                        <th>usr_psdate</th>
+                        <th>usr_psnew</th>
+                        <th>usr_odate</th>
+                        <th>usr_cdate</th>
+                        <th>usr_ataid</th>
+                        <th>usr_flag</th>
+                        <th>usr_allacc</th>
+                        <th>usr_branchid</th>
+                        <th>usr_bankid</th>
+                        <th>checksum</th>
+                        <th>usr_auth</th>
+                        <th>usr_ecno</th>
+                        <th>usr_delac</th>
+                        <th>usr_createid</th>
+                        <th>usr_entdate</th>
+                        <th>usr_hinfirst</th>
+                        <th>usr_valuedt</th>
+                        <th>usr_doj</th>
+                        <th>usr_retail</th>
+                        <th>usr_type</th>
+                        <th>usr_exprdate</th>
+                        <th>usr_brncode</th>
+                        <th>usr_ustDbalevel</th>
+                        <th>usr_auforIntrbrnTr</th>
+                        <th>usr_usttype</th>
+                        <th>usr_isMultiBrnUser</th>
+                        <th>usr_valuedtAuth</th>
+                        <th>usr_pswdlifetimevalid</th>
+                        <th>usr_dualAuth</th>
+                        <th>usr_cashTranYN</th>
+                        <th>usr_mobileno</th>
+                        <th>usr_emailid</th>
+                        <th>COMP_KID</th>
+                        <th>usr_deptid</th>
+                        <th>Edit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="su : ${sUsrs}">
+                        <td th:text="${su.usrCode}"></td>
+                        <td th:text="${su.usrHname}"></td>
+                        <td th:text="${su.name}"></td>
+                        <td th:text="${su.usrUstid}"></td>
+                        <td th:text="${su.password}"></td>
+                        <td th:text="${su.usrPsdate}"></td>
+                        <td th:text="${su.usrPsnew}"></td>
+                        <td th:text="${su.usrOdate}"></td>
+                        <td th:text="${su.usrCdate}"></td>
+                        <td th:text="${su.usrAtaid}"></td>
+                        <td th:text="${su.usrFlag}"></td>
+                        <td th:text="${su.usrAllacc}"></td>
+                        <td th:text="${su.usrBranchid}"></td>
+                        <td th:text="${su.usrBankid}"></td>
+                        <td th:text="${su.checksum}"></td>
+                        <td th:text="${su.usrAuth}"></td>
+                        <td th:text="${su.usrEcno}"></td>
+                        <td th:text="${su.usrDelac}"></td>
+                        <td th:text="${su.usrCreateid}"></td>
+                        <td th:text="${su.usrEntdate}"></td>
+                        <td th:text="${su.usrHinfirst}"></td>
+                        <td th:text="${su.usrValuedt}"></td>
+                        <td th:text="${su.usrDoj}"></td>
+                        <td th:text="${su.usrRetail}"></td>
+                        <td th:text="${su.usrType}"></td>
+                        <td th:text="${su.usrExprdate}"></td>
+                        <td th:text="${su.usrBrncode}"></td>
+                        <td th:text="${su.usrUstDbalevel}"></td>
+                        <td th:text="${su.usrAuforIntrbrnTr}"></td>
+                        <td th:text="${su.usrUsttype}"></td>
+                        <td th:text="${su.usrIsMultiBrnUser}"></td>
+                        <td th:text="${su.usrValuedtAuth}"></td>
+                        <td th:text="${su.usrPswdlifetimevalid}"></td>
+                        <td th:text="${su.usrDualAuth}"></td>
+                        <td th:text="${su.usrCashTranYN}"></td>
+                        <td th:text="${su.usrMobileno}"></td>
+                        <td th:text="${su.usrEmailid}"></td>
+                        <td th:text="${su.usrMngrCustId}"></td>
+                        <td th:text="${su.compKid}"></td>
+                        <td th:text="${su.usrDeptid}"></td>
+                        
+                        <td><a th:href="@{/editBidStageBYid/{id}(id=${su.id})}" class="btn btn-primary"><i class="fas fa-user-edit ml-2"></i></a></td>
+                        <!--<td><a th:onclick="'javascript:openDelete(\'' + ${bid.id} + '\');'" class="btn btn-primary"><i class="fas fa-user-times ml-2"></i></a></td> -->
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

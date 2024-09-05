@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>jQuery UI Multicolumn Autocomplete Demo</title>
+        <link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+        <style>
+        body { background-color:#f2f2f2;}
+        </style>
+	</head>
+	<body><div id="jquery-script-menu">
+<div class="jquery-script-center">
+<ul>
+<li><a href="http://www.jqueryscript.net/form/Multicolumn-Autocomplete-Control-with-jQuery-jQuery-UI.html">Download This Plugin</a></li>
+<li><a href="http://www.jqueryscript.net/">Back To jQueryScript.Net</a></li>
+</ul>
+<div class="jquery-script-ads"><script type="text/javascript"><!--
+google_ad_client = "ca-pub-2783044520727903";
+/* jQuery_demo */
+google_ad_slot = "2780937993";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div>
+<div class="jquery-script-clear"></div>
+</div>
+</div>
+    <h1 style="margin:150px auto 50px auto; text-align:center;">jQuery UI Multicolumn Autocomplete Demo</h1>
+		<div style="margin:10px auto;padding:8px;width:400px;" class="ui-widget ui-widget-content ui-corner-all">
+			<div style="margin:0 0 4px 4px;">Type in a color</div>
+			
+			<!-- This is the input control that gets turned into the jquery ui widget -->
+			<input id="search" type="text" style="padding:2px;font-size:.8em;width:200px;"/>
+		</div>
+	</body>
+
+	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/dark-hive/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+	<script type='text/javascript' src='jquery.mcautocomplete.js'></script>
+	<script type='text/javascript'>
+	$(document).ready(function() {
+	var sreachValue = 'DELUXE LOGISTICS PVT.LTD.';
+		 $.ajax({url: "http://127.0.0.1:8098/CobaSys/PurchaseOrderForm.do?action=setSupplierDetail&name="+sreachValue+"&param=supplier", success: function(result){
+			alert(result);
+		}});
+		
+	//	var url = "http://127.0.0.1:8098//CobaSys/newOrderForm.do?action=setSupplierDetail&name="+sreachValue+"&param=supplier"
+		var columns = [{name: 'Supplier Name', minWidth: '100px'}, {name: 'Pan ', minWidth:'70px'},{name: 'GST NO', minWidth:'70px'}],
+			jsonData = [['Del', '485','tw324','55'], ['Green', '#0f0','2','66'], ['Blue', '#00f','3','99']];
+
+		$("#search").mcautocomplete({
+		
+			showHeader: true,
+			columns: columns,
+			source: jsonData,
+			select: function(event, ui) {
+				this.value = (ui.item ? ui.item[0]: '');
+				return false;
+			}
+		});
+	});
+	</script>	
+</html>
