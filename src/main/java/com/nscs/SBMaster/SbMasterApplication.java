@@ -14,25 +14,5 @@ public class SbMasterApplication  {
 		SpringApplication.run(SbMasterApplication.class, args);
 	}
 
-	/*
-	@Autowired
-	private EmployeeRepository emprep ;
-	@Override
-	public void run(String... args) throws Exception {
-
-		Employee emp = new Employee();
-		emp.setFirstName("Vinay") ;
-		emp.setLastName("Dwivedi") ;
-		emp.setEmailID("vinay@nscspl.in") ;
-		emprep.save(emp) ;
-
-		Employee emp1 = new Employee();
-		emp1.setFirstName("Reetik") ;
-		emp1.setLastName("Sharma") ;
-		emp1.setEmailID ("reetik@nscspl.in") ;
-		emprep.save(emp1) ;
-
-	}
-	*/
 
 }

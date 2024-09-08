@@ -123,7 +123,7 @@ public class CaseController {
                 caseDetail.setCaseTypeEname(caseCategories.get(0).get("category_name").toString());
             }
 
-            if (caseDetail.getFactFileCode() != null) {
+            if (caseDetail.getFactFileCode() != null && !caseDetail.getFactFileCode().equals("")) {
                 CaseDocuments caseDocument = caseDocumentService.findByFactCode(caseDetail.getFactFileCode());
                 if (caseDocument != null && caseDocument.getDoc_approval()!=null) {
                     if (caseDocument.getDoc_approval().equals("U")) {
@@ -159,7 +159,7 @@ public class CaseController {
                 caseDetail.setCaseTypeEname(caseCategories.get(0).get("category_name").toString());
             }
 
-            if (caseDetail.getFactFileCode() != null) {
+            if (caseDetail.getFactFileCode() != null && !caseDetail.getFactFileCode().equals("") ) {
                 CaseDocuments caseDocument = caseDocumentService.findByFactCode(caseDetail.getFactFileCode());
                 if (caseDocument != null && caseDocument.getDoc_approval()!=null) {
                     if (caseDocument.getDoc_approval().equals("U")) {

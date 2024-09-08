@@ -59,8 +59,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity (ensure this is appropriate for your context)
                 .authorizeRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/signin", "/saveUser").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/register", "/menu/userLoginMenus/{ustid}").permitAll() // Allow unauthenticated access to /register
+                        .requestMatchers("/signin", "/saveUser").permitAll() // Other public endpoints
+                        .anyRequest().authenticated() // All other requests require authentication
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/signin")

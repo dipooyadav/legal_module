@@ -43,7 +43,7 @@ public interface CaseDetailsRepository extends JpaRepository<CaseDetails, Long> 
 
 
     @Query(value="select id, assigned_to, case_deadline, case_description, case_priority, case_title ,case_type, client" +
-            ", lawyer , case_type_ename , case_status ,fact_file_code," +
+            ", lawyer , case_status ,fact_file_code," +
             "fact_feedback, comp_flag from case_details c, case_documents d where c.fact_file_code=d.doc_id and d.doc_approval='A' AND NOT EXISTS ( SELECT 1 FROM  reply_details r WHERE r.case_id = c.id)",nativeQuery = true)
     List<CaseDetails> findApprovedCasesWithNonNullFactFileCode();
 

@@ -127,7 +127,7 @@ public interface MenuAccessRepository  extends JpaRepository<MenuAccess,Long> {
     @Query(value = "SELECT DISTINCT s_mnu.mnu_ename, s_mnu.mnu_hname, s_mnu.mnu_lvlno, s_mnu.mnu_lvlsno, s_mnu.mnu_next, " +
             "COALESCE(s_mnu.mnu_pageDisplayType, '') as mnu_pageDisplayType, mnu_moduleno, mnu_sno, mnu_wordno, mnuust_flag,s_mnu.mnu_path " +
             "FROM modules, s_mnu " +
-            "LEFT OUTER JOIN s_mnuust ON s_mnu.mnu_sno = s_mnuust.mnuust_mnusno AND s_mnuust.mnuust_userid = :ustid " +
+            "LEFT OUTER JOIN s_mnuust ON s_mnu.mnu_sno = s_mnuust.mnuust_mnusno AND getAccessRightMenuUstLogin.mnuust_userid = :ustid " +
             "WHERE s_mnu.mnu_lvlno = '' " +
             "AND s_mnu.mnu_lvlsno <> '99' " +
             "AND sno = mnu_moduleno " +
