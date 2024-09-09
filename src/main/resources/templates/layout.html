@@ -793,10 +793,10 @@ transition: padding-left 0.3s;
 
 <body>
 <header class="header">
-  <div class="header-title">
-    <img src="~/imges/download.jfif" alt="Logo"> <!-- Add your logo image here -->
-    <i class=""></i> Legal Case Management
-  </div>
+    <div class="header-title">
+        <img src="~/imges/download.jfif" alt="Logo"> <!-- Add your logo image here -->
+        <i class="fa-solid fa-scale-balanced"></i> Legal Case Management
+    </div>
 
     <a href="#" class="logout-btn">
         <i class="fa-solid fa-right-from-bracket fa-2x"></i>
@@ -804,84 +804,56 @@ transition: padding-left 0.3s;
 </header>
 
 <div class="l-navbar" id="navbar">
-  <nav class="nav">
-    <div>
+    <nav class="nav">
+        <div>
+            <div class="nav__brand">
+                <ion-icon name="menu-outline" class="nav__toggle" id="nav-toggle"></ion-icon>
+            </div>
 
-        <div class="nav__brand">
-            <ion-icon name="menu-outline" class="nav__toggle" id="nav-toggle"></ion-icon>
+            <!-- Dynamically generated menu -->
+            <div class="nav__list">
+                <ul>
+                    <!-- Loop through menuData from the model -->
+                    <li th:each="menuItem : ${menuResponse.menuData}">
+                        <a th:href="@{'/' + ${menuItem.path}}" class="nav__link">
+                            <i class="fa-solid fa-caret-right fa-2x"></i>
+                            <span class="nav__name" th:text="${menuItem.label}"></span>
+                        </a>
+
+                        <!-- Check if the menu item has children -->
+                        <ul th:if="${menuItem.children != null}">
+                            <li th:each="childItem : ${menuItem.children}">
+                                <a th:href="@{'/' + ${childItem.path}}" class="nav__link">
+                                    <i class="fa-solid fa-circle fa-2x"></i>
+                                    <span class="nav__name" th:text="${childItem.label}"></span>
+                                </a>
+
+                                <!-- Nested child items if any -->
+                                <ul th:if="${childItem.children != null}">
+                                    <li th:each="grandChildItem : ${childItem.children}">
+                                        <a th:href="@{'/' + ${grandChildItem.path}}" class="nav__link">
+                                            <i class="fa-solid fa-arrow-right fa-2x"></i>
+                                            <span class="nav__name" th:text="${grandChildItem.label}"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div class="nav__list">
-            <a th:href="@{/createCase}" class="nav__link active">
-                <i class="fa-solid fa-scale-unbalanced-flip fa-2x"></i>
-            <span class="nav__name">Case Entry</span>
-            </a>
-            <a th:href="@{/caseList}" class="nav__link">
-                <i class="fa-solid fa-list fa-2x"></i>
-            <span class="nav__name">Case Approval</span>
-            </a>
-            <a th:href="@{/caseFact}" class="nav__link">
-                <i class="fa-solid fa-file-arrow-up fa-2x"></i>
-            <span class="nav__name">Fact File Upload</span>
-            </a>
-            <a th:href="@{/CaseFactApproval}" class="nav__link">
-                <i class="fa-solid fa-thumbs-up fa-2x"></i>
-                <span class="nav__name">Fact File Approval</span>
-            </a>
-            <a th:href="@{/replyDetails}" class="nav__link">
-                <i class="fa-solid fa-reply fa-2x"></i>
-                <span class="nav__name">Reply Entry</span>
-            </a>
-            <a th:href="@{/AddHearingDetail}" class="nav__link">
-                <i class="fa-solid fa-gavel fa-2x"></i>
-                <span class="nav__name">Hearing Entry</span>
-            </a>
-            <a th:href="@{/hearingHistory}" class="nav__link">
-                <i class="fa-solid fa-gavel fa-2x"></i>
-                <span class="nav__name">Hearing History</span>
-            </a>
-            <a th:href="@{/UpcomingHearing}" class="nav__link">
-                <i class="fa-solid fa-gavel fa-2x"></i>
-                <span class="nav__name">Upcoming Hearings</span>
-            </a>            
-        </div>
-
-        
-    </div>
-
-  </nav>
+    </nav>
 </div>
 
 <main class="dashboard" role="main" id="main-content" style="overflow-y:auto">
-  <div class="content" layout:fragment="content">
-    <!-- This will be replaced by the content of each page -->
-  </div>
-  <div class="dashboard-grid" style="display:none">
-    <div class="dashboard-box">
-      <h2 class="box-title"><i class="fas fa-home"></i> Section 1</h2>
-      <p class="box-content">Content for Section 1</p>
+    <div class="content" layout:fragment="content">
+        <!-- This will be replaced by the content of each page -->
     </div>
-    <div class="dashboard-box">
-      <h2 class="box-title"><i class="fas fa-user"></i> Section 2</h2>
-      <p class="box-content">Content for Section 2</p>
-    </div>
-    <div class="dashboard-box">
-      <h2 class="box-title"><i class="fas fa-cog"></i> Section 3</h2>
-      <p class="box-content">Content for Section 3</p>
-    </div>
-    <div class="dashboard-box">
-      <h2 class="box-title"><i class="fas fa-chart-line"></i> Section 4</h2>
-      <p class="box-content">Content for Section 4</p>
-    </div>
-    <div class="dashboard-box">
-      <h2 class="box-title"><i class="fas fa-envelope"></i> Section 5</h2>
-      <p class="box-content">Content for Section 5</p>
-    </div>
-    <div class="dashboard-box">
-      <h2 class="box-title"><i class="fas fa-calendar-alt"></i> Section 6</h2>
-      <p class="box-content">Content for Section 6</p>
-    </div>
-  </div>
 </main>
+</body>
+
+
 <!-- ===== IONICONS ===== -->
 
 

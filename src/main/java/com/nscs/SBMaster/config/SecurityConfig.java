@@ -1,13 +1,17 @@
 package com.nscs.SBMaster.config;
 
+import jakarta.servlet.ServletContext;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -54,6 +58,25 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    // Bean to handle session expiration events (for concurrent session management)
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
+
+    // Set session timeout programmatically
+    @Bean
+    public ServletContextInitializer servletContextInitializer() {
+        return new ServletContextInitializer() {
+            @Override
+            public void onStartup(ServletContext servletContext) {
+                servletContext.getSessionCookieConfig().setMaxAge(1800); // Set session timeout to 30 minutes
+                servletContext.setSessionTimeout(30); // Set session timeout to 30 minutes
+            }
+        };
+    }
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -75,7 +98,15 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
-                );
+                )
+                .sessionManagement(sessionManagement -> sessionManagement
+                        .invalidSessionUrl("/signin?session=invalid") // Redirect if session is invalid
+                        .maximumSessions(1) // Allow only one concurrent session per user
+                        .expiredUrl("/signin?session=expired") // Redirect if session expires
+                        .maxSessionsPreventsLogin(true) // Prevent new login if max sessions are reached
+                        .and()
+                        .sessionFixation().migrateSession() // Prevent session fixation attacks
+                );;
         return http.build();
     }
 }
